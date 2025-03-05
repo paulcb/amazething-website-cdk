@@ -53,13 +53,13 @@ export class AMazeThingService extends Construct {
         });
 
         s3bucket.grantWrite(writeS3ObjFn);
-
+        
         //TODO: clean bucket on redploy
         //TODO: remove bucket on destroy
         //TODO: make bucket sync with github repo?
         //TODO: check that permission are best practice for static website
         new BucketDeployment(this, `${stackName}-DeployFiles`, {
-            sources: [Source.asset('./website/dist')],
+            sources: [Source.asset('./website/dist'), Source.asset("./lib/common/data")],
             destinationBucket: s3bucket,
         });
 
