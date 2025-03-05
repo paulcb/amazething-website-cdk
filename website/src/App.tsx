@@ -4,6 +4,7 @@ import { ChangeEvent, useEffect, useState } from 'react';
 // import './App.css';
 import Board from './Board';
 import Maze from './../../lib/common/maze-generator'
+import { ifError } from "assert";
 
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
@@ -38,7 +39,10 @@ function App() {
 
   const fetchData = async (dateKey: string) => {
     try {
-      const response = await fetch(process.env.PUBLIC_URL + `/${dateKey}_mazedata.json`);
+      const pubUrl = import.meta.env.BASE_URL;
+      if (!pubUrl) throw new Error('no public url!');
+
+      const response = await fetch(pubUrl + `/${dateKey}_mazedata.json`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -56,8 +60,9 @@ function App() {
       setError(error);
       if (error instanceof SyntaxError) {
         // console.log("SyntaxError dateKey", dateKey);
-      } else {
-        console.log("error", error);
+      }
+      else {
+        console.log(error);
       }
     } finally {
       // clearTimeout(timeoutId);
@@ -180,7 +185,7 @@ function App() {
           ))}
         </select>
       </div>
-      <p >(v1.8)</p>
+      <p >(v1.9)</p>
     </>
   );
 

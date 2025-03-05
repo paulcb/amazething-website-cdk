@@ -3,7 +3,7 @@ import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-node
 import { Bucket, BlockPublicAccess, BucketAccessControl } from 'aws-cdk-lib/aws-s3';
 import { AllowedMethods, Distribution, GeoRestriction, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 
-import { Duration, Stack } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib';
 import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 
@@ -25,7 +25,9 @@ export class AMazeThingService extends Construct {
             blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
             accessControl: BucketAccessControl.PRIVATE,
             enforceSSL: true,
-            versioned: true,
+            publicReadAccess: false,
+            removalPolicy: RemovalPolicy.DESTROY,
+
         });
 
         //TODO: figure out SDK v2 warning from cdk deploy.
@@ -57,7 +59,7 @@ export class AMazeThingService extends Construct {
         //TODO: make bucket sync with github repo?
         //TODO: check that permission are best practice for static website
         new BucketDeployment(this, `${stackName}-DeployFiles`, {
-            sources: [Source.asset('./../mazeapp/build')],
+            sources: [Source.asset('./website/dist')],
             destinationBucket: s3bucket,
         });
 
