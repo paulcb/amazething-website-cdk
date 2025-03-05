@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { AMazeThingService } from './amazething-service';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class AmazethingWebsiteCdkStack extends cdk.Stack {
@@ -12,5 +13,7 @@ export class AmazethingWebsiteCdkStack extends cdk.Stack {
     // const queue = new sqs.Queue(this, 'AmazethingWebsiteCdkQueue', {
     //   visibilityTimeout: cdk.Duration.seconds(300)
     // });
+
+    new AMazeThingService(this, 'AMazeThingService');
   }
 }
