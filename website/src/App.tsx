@@ -181,7 +181,7 @@ function App() {
           ))}
         </select>
       </div>
-      <p >(v1.9.1)</p>
+      <p >(v0.1.9)</p>
     </>
   );
 

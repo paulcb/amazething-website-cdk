@@ -1,6 +1,6 @@
 import fs from "node:fs";
 
-import Maze from "./maze-generator";
+import Maze from "./../lib/common/maze-generator";
 
 const dayCount = 10;
 const date = new Date();
@@ -20,7 +20,7 @@ for (let x = 0; x < dayCount; x++) {
 
     console.log(res);
 
-    fs.writeFile(`${dateKey}_mazedata.json`, JSON.stringify(res), err => {
+    fs.writeFile(`data/${dateKey}_mazedata.json`, JSON.stringify(res), err => {
         if (err) {
             console.error(err);
         } else {

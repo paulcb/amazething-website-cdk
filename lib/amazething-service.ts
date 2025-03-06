@@ -27,7 +27,6 @@ export class AMazeThingService extends Construct {
             enforceSSL: true,
             publicReadAccess: false,
             removalPolicy: RemovalPolicy.DESTROY,
-
         });
 
         //TODO: figure out SDK v2 warning from cdk deploy.
@@ -53,14 +52,17 @@ export class AMazeThingService extends Construct {
         });
 
         s3bucket.grantWrite(writeS3ObjFn);
-        
+
         //TODO: clean bucket on redploy
         //TODO: remove bucket on destroy
         //TODO: make bucket sync with github repo?
         //TODO: check that permission are best practice for static website
         new BucketDeployment(this, `${stackName}-DeployFiles`, {
-            sources: [Source.asset('./website/dist'), Source.asset("./lib/common/data")],
+            sources: [Source.asset('./website/dist')],
             destinationBucket: s3bucket,
+            exclude: ["*_mazedata.json"], //don't delete lambda generated maze data
+            // retainOnDelete: true,
+            // prune: false
         });
 
         const distribution = new Distribution(this, `${stackName}-Dist`, {
