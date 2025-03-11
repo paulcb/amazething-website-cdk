@@ -3,7 +3,7 @@ import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-node
 import { Bucket, BlockPublicAccess, BucketAccessControl } from 'aws-cdk-lib/aws-s3';
 import { AllowedMethods, Distribution, GeoRestriction, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 
-import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib';
+import { CfnOutput, Duration, RemovalPolicy, Stack } from 'aws-cdk-lib';
 import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 
@@ -12,21 +12,27 @@ import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 
 import path = require('path');
+import { envTag } from './common/helpers';
 
 export class AMazeThingService extends Construct {
-    constructor(scope: Construct, id: string) {
+    constructor(scope: Construct, id: string, isProduction: boolean) {
         super(scope, id);
 
         //TODO: double check that stack name is append to all resources
-        const stackName = Stack.of(this).stackName.toLowerCase();
-        const bucketName = `${stackName}-oacbucket`;
-        const s3bucket = new Bucket(this, `${stackName}-Bucket`, {
+        const stackName = Stack.of(this).stackName;
+        const bucketName = envTag(`${stackName.toLowerCase()}-bucket`);
+
+        const s3bucket = new Bucket(this, envTag(`${stackName}-Bucket`), {
             bucketName: bucketName,
             blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
             accessControl: BucketAccessControl.PRIVATE,
             enforceSSL: true,
             publicReadAccess: false,
-            removalPolicy: RemovalPolicy.DESTROY,
+            removalPolicy: isProduction
+                ? RemovalPolicy.RETAIN
+                : RemovalPolicy.DESTROY,
+            versioned: isProduction,
+
         });
 
         //TODO: figure out SDK v2 warning from cdk deploy.
@@ -42,7 +48,7 @@ export class AMazeThingService extends Construct {
         };
 
         //TODO: create local link for maze.ts
-        const writeS3ObjFn = new NodejsFunction(this, `${stackName}-WriteS3`, {
+        const writeS3ObjFn = new NodejsFunction(this, envTag(`${stackName}-${NodejsFunction.name}`), {
             entry: path.join('./lib/lambda', 's3WriteMazes.ts'),
             ...nodeJsFunctionProps,
             functionName: `${stackName.replace('-', '')}S3Write`,
@@ -57,7 +63,7 @@ export class AMazeThingService extends Construct {
         //TODO: remove bucket on destroy
         //TODO: make bucket sync with github repo?
         //TODO: check that permission are best practice for static website
-        new BucketDeployment(this, `${stackName}-DeployFiles`, {
+        new BucketDeployment(this, envTag(`${stackName}-${BucketDeployment.name}`), {
             sources: [Source.asset('./website/dist')],
             destinationBucket: s3bucket,
             exclude: ["*_mazedata.json"], //don't delete lambda generated maze data
@@ -65,7 +71,7 @@ export class AMazeThingService extends Construct {
             // prune: false
         });
 
-        const distribution = new Distribution(this, `${stackName}-Dist`, {
+        const distribution = new Distribution(this, envTag(`${stackName}-${Distribution.name}`), {
             defaultRootObject: 'index.html',
             defaultBehavior: {
                 origin: S3BucketOrigin.withOriginAccessControl(s3bucket),
@@ -78,10 +84,13 @@ export class AMazeThingService extends Construct {
 
         //TODO: AWS logs show that schedule doesn't occur actually at 0:0:0. Check why.
         //TODO: Clear unused days
-        const rule = new Rule(this, `${stackName}-ScheduleRule`, {
+        const rule = new Rule(this, envTag(`${stackName}-${Rule.name}`), {
             schedule: Schedule.cron({ minute: '0', hour: '0' }),
         });
 
         rule.addTarget(new LambdaFunction(writeS3ObjFn));
+
+        new CfnOutput(this, 'Distribution domain name', { value: distribution.domainName });
+
     }
 }
