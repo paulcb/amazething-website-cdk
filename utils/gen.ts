@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 
-import Maze from "./../lib/common/maze-generator.ts";
+import Maze from "./../lib/common/maze-generator";
 
 const dayCount = 10;
 const date = new Date();
