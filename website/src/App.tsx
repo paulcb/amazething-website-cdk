@@ -7,26 +7,6 @@ import Maze from './../../lib/common/maze-generator'
 
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-// function App() {
-//   return (
-//     <div className="App">
-//       <header className="App-header">
-//         <p>
-//           Edit <code>src/App.tsx</code> and save to reload.
-//         </p>
-//         <a
-//           className="App-link"
-//           href="https://reactjs.org"
-//           target="_blank"
-//           rel="noopener noreferrer"
-//         >
-//           Learn React
-//         </a>
-//       </header>
-//     </div>
-//   );
-// }
-
 function App() {
   const [data, setData] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
@@ -77,7 +57,7 @@ function App() {
       AppData.data.lastElement = null;
       AppData.data.lastMapKey = null;
       if (isMobile) {
-        AppData.data.maze = new Maze(null, 12, 8);
+        AppData.data.maze = new Maze(null, 12, 9);
         AppData.data.maze.init();
       } else {
         AppData.data.maze = new Maze(null, 16, 20);
@@ -181,7 +161,7 @@ function App() {
           ))}
         </select>
       </div>
-      <p >(v0.1.9)</p>
+      <p >(v0.2.0)</p>
     </>
   );
 

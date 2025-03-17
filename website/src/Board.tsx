@@ -17,7 +17,7 @@ export default function Board() {
 
         if (AppData.data.winState) return;
 
-        if (!AppData.data.maze.graphGroups[0].has(mapKey)) {
+        if (AppData.data.maze.graphGroups && !AppData.data.maze.graphGroups[0].has(mapKey)) {
             return;
         }
 
@@ -107,6 +107,7 @@ export default function Board() {
             </>
         );
     }
+
     return (<></>);
 }
 

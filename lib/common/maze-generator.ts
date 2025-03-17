@@ -1,24 +1,19 @@
 
-export class Boarders {
-    up: number;
-    down: number;
-    left: number;
-    right: number;
-    key: null;
-    constructor(up = 0, down = 0, left = 0, right = 0, key = null) {
-        this.up = up;
-        this.down = down;
-        this.left = left;
-        this.right = right;
-        this.key = key;
-    }
+function createBoarderKeys(row: number, col: number, rowsLen: number, colsLen: number) {
+    return {
+        key: `${row} ${col}`,
+        up: !(row - 1 < 0) ? `${row - 1} ${col}` : null,
+        down: !(row + 1 >= rowsLen) ? `${row + 1} ${col}` : null,
+        left: !(col - 1 < 0) ? `${row} ${col - 1}` : null,
+        right: !(col + 1 >= colsLen) ? `${row} ${col + 1}` : null
+    };
 }
 
-// function getRandomInt(min: number, max: number) {
-//     min = Math.ceil(min);
-//     max = Math.floor(max);
-//     return Math.floor(Math.random() * (max - min + 1)) + min;
-// }
+function getRandomInt(min: number, max: number) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 function compareNumbers(a: Set<string>, b: Set<string>) {
     return a.size - b.size;
@@ -107,7 +102,8 @@ export default class Maze {
     //     return { up: upKey, down: downKey, right: rightKey, left: leftKey }
     // }
 
-    addAdjacentNode(set: Set<string>, key1: string, key2: string) {
+    addAdjacentNode(set: Set<string>, key1: string | null, key2: string | null) {
+        if (key2 === null || key1 === null) return false;
         if (set.has(key2)) {
             this.graph.get(key2).add(key1);
             this.graph.get(key1).add(key2);
@@ -125,19 +121,14 @@ export default class Maze {
         for (let i = 0; i < this.rowsLen; i++) {
             const boardRow: any[] = [];
             for (let j = 0; j < this.colsLen; j++) {
-                const key = `${i} ${j}`;
-                const upKey = `${i - 1} ${j}`;
-                const downKey = `${i + 1} ${j}`;
-                const rightKey = `${i} ${j + 1}`;
-                const leftKey = `${i} ${j - 1}`;
-
-                const inPath = this.maxPath.path.has(key);
+                const bs = createBoarderKeys(i, j, this.rowsLen, this.colsLen);
+                const inPath = this.maxPath.path.has(bs.key);
                 const borders = {
-                    up: this.graph.get(key).has(upKey) ? 0 : 1,
-                    down: this.graph.get(key).has(downKey) ? 0 : 1,
-                    left: this.graph.get(key).has(leftKey) ? 0 : 1,
-                    right: this.graph.get(key).has(rightKey) ? 0 : 1,
-                    key: `${i} ${j}`,
+                    up: this.graph.get(bs.key).has(bs.up) ? 0 : 1,
+                    down: this.graph.get(bs.key).has(bs.down) ? 0 : 1,
+                    left: this.graph.get(bs.key).has(bs.left) ? 0 : 1,
+                    right: this.graph.get(bs.key).has(bs.right) ? 0 : 1,
+                    key: bs.key,
                     inPath: inPath
                 };
                 boardRow.push(borders);
@@ -199,15 +190,13 @@ export default class Maze {
 
             }
         }
-        if (dest !== null && found) {
+        if (dest !== null) {
             maxPath = {
                 path: new Map(), source: source, dest: dest, distance: dist.get(dest)
             };
             let p = paths.get(dest);
             maxPath.path.set(dest, p);
-            // console.log("path", p);
             while (p !== source) {
-                // console.log("path", p);
                 const save = p;
                 p = paths.get(p);
                 maxPath.path.set(save, p);
@@ -224,7 +213,10 @@ export default class Maze {
             const row = Number.parseInt(split[0]);
             const col = Number.parseInt(split[1]);
 
-            if (!((row - 1 < 0) || (row + 1 >= this.rowsLen) || (col + 1 >= this.colsLen) || (col - 1 < 0))) continue;
+            if (!((row - 1 < 0) ||
+                (row + 1 >= this.rowsLen) ||
+                (col + 1 >= this.colsLen) ||
+                (col - 1 < 0))) continue;
 
             const maxPath = this.breadthFirstSearch(entry, null, true);
             if (lsp == null) lsp = maxPath;
@@ -238,6 +230,59 @@ export default class Maze {
         }
         const maxPath = this.breadthFirstSearch(lsp.source, lsp.dest);
         this.maxPath = maxPath;
+
+    }
+
+    generateMaze() {
+        for (let i = 0; i < this.rowsLen; i++) {
+            for (let j = 0; j < this.colsLen; j++) {
+                const nodes = new Set();
+                const bs = createBoarderKeys(i, j, this.rowsLen, this.colsLen);
+                // nodes.add(bs.up);
+                // nodes.add(bs.down);
+                // nodes.add(bs.right);
+                // nodes.add(bs.left);
+                this.graph.set(bs.key, nodes);
+            }
+        }
+
+        const visited = new Set();
+        const stack: any[] = [];
+        stack.push('0 0');
+        visited.add('0 0');
+
+        while (stack.length !== 0) {
+
+            const node = stack.pop();
+            if (node === undefined) break;
+
+            const neighbors: any[] = [];
+
+            const split = node.split(" ");
+            const row = Number.parseInt(split[0]);
+            const col = Number.parseInt(split[1]);
+            const bs = createBoarderKeys(row, col, this.rowsLen, this.colsLen);
+            for (const [key, value] of Object.entries(bs)) {
+                if (value === null || value === node) continue;
+
+                if (!visited.has(value)) {
+                    
+                    neighbors.push({position: key, neighbor: value, parent: node});
+                }
+            }
+
+            if (neighbors.length > 0) {
+                
+                const randIndex = getRandomInt(0, neighbors.length - 1);
+                const randN = neighbors[randIndex];
+                stack.push(randN.parent);
+                this.graph.get(randN.parent).add(randN.neighbor);
+                this.graph.get(randN.neighbor).add(randN.parent);
+
+                visited.add(randN.neighbor);
+                stack.push(randN.neighbor);
+            }
+        }
 
     }
 
@@ -269,65 +314,62 @@ export default class Maze {
         return graphGroups;
     }
 
-    generateMaze() {
+    generateMazeBk() {
         if (this.debug) console.log("generateMaze");
         for (let i = 0; i < this.rowsLen; i++) {
             for (let j = 0; j < this.colsLen; j++) {
-                const key = `${i} ${j}`;
-                const upKey = `${i - 1} ${j}`;
-                const downKey = `${i + 1} ${j}`;
-                const rightKey = `${i} ${j + 1}`;
-                const leftKey = `${i} ${j - 1}`;
+                const bs = createBoarderKeys(i, j, this.rowsLen, this.colsLen);
 
                 const nodes = new Set();
-                const borders = {
+
+                const bsRand = {
                     up: Math.random() > this.edgeRate ? 1 : 0,
                     down: Math.random() > this.edgeRate ? 1 : 0,
                     left: Math.random() > this.edgeRate ? 1 : 0,
                     right: Math.random() > this.edgeRate ? 1 : 0,
-                    key: key
+                    key: bs.key
                 };
 
                 if (i - 1 < 0) {
-                    borders.up = 1;
+                    bsRand.up = 1;
                 } else {
-                    if (borders.up === 1 && this.graph.get(upKey).has(key)) {
-                        this.graph.get(upKey).delete(key);
+                    if (bsRand.up === 1 && this.graph.get(bs.up).has(bs.key)) {
+                        this.graph.get(bs.up).delete(bs.key);
                     }
 
-                    if (borders.up === 0 && !this.graph.get(upKey).has(key)) {
-                        this.graph.get(upKey).add(key);
+                    if (bsRand.up === 0 && !this.graph.get(bs.up).has(bs.key)) {
+                        this.graph.get(bs.up).add(bs.key);
                     }
                 }
 
                 if (i + 1 >= this.rowsLen) {
-                    borders.down = 1;
+                    bsRand.down = 1;
                 }
 
                 if (j + 1 >= this.colsLen) {
-                    borders.right = 1;
+                    bsRand.right = 1;
                 }
 
                 if (j - 1 < 0) {
-                    borders.left = 1;
+                    bsRand.left = 1;
                 } else {
-                    if (borders.left === 1 && this.graph.get(leftKey).has(key)) {
-                        this.graph.get(leftKey).delete(key);
+                    if (bsRand.left === 1 && this.graph.get(bs.left).has(bs.key)) {
+                        this.graph.get(bs.left).delete(bs.key);
                     }
 
-                    if (borders.left === 0 && !this.graph.get(leftKey).has(key)) {
-                        this.graph.get(leftKey).add(key);
+                    if (bsRand.left === 0 && !this.graph.get(bs.left).has(bs.key)) {
+                        this.graph.get(bs.left).add(bs.key);
                     }
                 }
 
 
-                if (borders.up === 0) nodes.add(upKey);
-                if (borders.down === 0) nodes.add(downKey);
-                if (borders.right === 0) nodes.add(rightKey);
-                if (borders.left === 0) nodes.add(leftKey);
+                if (bsRand.up === 0) nodes.add(bs.up);
+                if (bsRand.down === 0) nodes.add(bs.down);
+                if (bsRand.right === 0) nodes.add(bs.right);
+                if (bsRand.left === 0) nodes.add(bs.left);
 
 
-                this.graph.set(key, nodes);
+                this.graph.set(bs.key, nodes);
             }
         }
 
@@ -350,24 +392,21 @@ export default class Maze {
                     const row = Number.parseInt(split[0]);
                     const col = Number.parseInt(split[1]);
 
-                    const upKey = `${row - 1} ${col}`;
-                    const downKey = `${row + 1} ${col}`;
-                    const rightKey = `${row} ${col + 1}`;
-                    const leftKey = `${row} ${col - 1}`;
+                    const bs = createBoarderKeys(row, col, this.rowsLen, this.colsLen);
 
-                    if (this.addAdjacentNode(tempGroup, entry, upKey)) {
+                    if (this.addAdjacentNode(tempGroup, entry, bs.up)) {
                         graphGroups = this.findGroups();
                         break;
                     }
-                    if (this.addAdjacentNode(tempGroup, entry, downKey)) {
+                    if (this.addAdjacentNode(tempGroup, entry, bs.down)) {
                         graphGroups = this.findGroups();
                         break;
                     }
-                    if (this.addAdjacentNode(tempGroup, entry, rightKey)) {
+                    if (this.addAdjacentNode(tempGroup, entry, bs.right)) {
                         graphGroups = this.findGroups();
                         break;
                     }
-                    if (this.addAdjacentNode(tempGroup, entry, leftKey)) {
+                    if (this.addAdjacentNode(tempGroup, entry, bs.left)) {
                         graphGroups = this.findGroups();
                         break;
                     }
