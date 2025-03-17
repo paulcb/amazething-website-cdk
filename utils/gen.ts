@@ -1,12 +1,12 @@
 import * as fs from "node:fs";
 
-import Maze from "./../lib/common/maze-generator";
+import Maze from "./../lib/common/maze-generator.ts";
 
 const dayCount = 10;
 const date = new Date();
 
 for (let x = 0; x < dayCount; x++) {
-    const maze1 = new Maze(null, 12, 8);
+    const maze1 = new Maze(null, 12, 9);
     maze1.init();
 
     const maze2 = new Maze(null, 16, 20);
