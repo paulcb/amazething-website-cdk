@@ -1,5 +1,13 @@
 
-function createBoarderKeys(row: number, col: number, rowsLen: number, colsLen: number) {
+/**
+ * Creates a boarder keys object for a given row and column.
+ * @param {number} row The row number.
+ * @param {number} col The column number.
+ * @param {number} rowsLen The length of the rows.
+ * @param {number} colsLen The length of the columns.
+ * @returns {Object} A boarder keys object with up, down, left, and right properties.
+ */
+function createBoarderKeys(row: number, col: number, rowsLen: number, colsLen: number): any {
     return {
         key: `${row} ${col}`,
         up: !(row - 1 < 0) ? `${row - 1} ${col}` : null,
@@ -15,26 +23,55 @@ function getRandomInt(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// function compareNumbers(a: Set<string>, b: Set<string>) {
-// return a.size - b.size;
-// }
+class MaxPath {
+    path: Map<string, string>;
+    source: string;
+    dest: string;
+    distance: number;
 
+    constructor(path: Map<string, string>, source: string, dest: string, distance: number) {
+        this.path = path;
+        this.source = source;
+        this.dest = dest;
+        this.distance = distance;
+    }
+}
+/**
+ * Represents a maze with the following properties:
+ *  - board: A 2D array representing the maze.
+ *  - graph: A map of nodes to their adjacent nodes.
+ *  - maxPath: The longest path in the maze.
+ *  - debug: A boolean flag for debugging purposes.
+ *  - inputMaze: The input maze data (optional).
+ *  - rowsLen: The length of the rows in the maze.
+ *  - colsLen: The length of the columns in the maze.
+ *  - mazeJsonOutput: The JSON output of the maze data (optional).
+ */
 export default class Maze {
-    board: any[];
-    graph: Map<any, any>;
-    maxPath: any | null;
+    board: any[][];
+    graph: Map<string, Set<string>>;
+    maxPath: any;
     debug: boolean;
     inputMaze: any;
-    rowsLen: any;
-    colsLen: any;
+    rowsLen: number;
+    colsLen: number;
     mazeJsonOutput: any;
+
+    /**
+     * Constructs a new Maze instance.
+     * @param {any} inputMaze The input maze data (optional).
+     * @param {number} [rowsLen=16] The length of the rows (default: 16).
+     * @param {number} [colsLen=6] The length of the columns (default: 6).
+     * @param {boolean} [isInit=false] Whether to initialize the maze (default: false).
+     * @param {boolean} [debug=false] Whether to enable debugging (default: false).
+     */
     constructor(inputMaze: any,
         rowsLen: number = 16,
         colsLen: number = 6,
-        isInit: boolean = false, debug: boolean = false) {
-
+        isInit: boolean = false,
+        debug: boolean = false) {
         this.board = [];
-        this.graph = new Map();
+        this.graph = new Map<string, Set<string>>();
         this.maxPath = null;
         this.debug = debug;
 
@@ -55,6 +92,9 @@ export default class Maze {
         }
     }
 
+    /**
+     * Initializes the maze data.
+     */
     init() {
         if (!this.inputMaze) {
             this.generateMaze();
@@ -64,7 +104,9 @@ export default class Maze {
             for (const entry of this.inputMaze.nodes) {
                 this.graph.set(entry[0], new Set<string>());
                 for (const edge of entry[1]) {
-                    this.graph.get(entry[0]).add(edge);
+                    const nodeSet = this.graph.get(entry[0]);
+                    if (nodeSet !== undefined)
+                        nodeSet.add(edge);
                 }
             }
         }
@@ -89,29 +131,41 @@ export default class Maze {
     addAdjacentNode(set: Set<string>, key1: string | null, key2: string | null) {
         if (key2 === null || key1 === null) return false;
         if (set.has(key2)) {
-            this.graph.get(key2).add(key1);
-            this.graph.get(key1).add(key2);
+            const key1Set = this.graph.get(key1);
+            if (key1Set === undefined) {
+                throw Error("Expected key");
+            }
+            const ket2Set = this.graph.get(key2);
+            if (ket2Set === undefined) {
+                throw Error("Expected key");
+            }
+            ket2Set.add(key1);
+            key1Set.add(key2);
             return true;
         }
         return false;
     }
 
+    /**
+     * Builds the maze board data.
+     */
     buildBoard() {
         if (this.debug) console.log("buildBoard");
-        if (this.maxPath == null) {
-            console.log("Error: max path is null");
-            return
+        if (this.maxPath === null) {
+            return;
         }
         for (let i = 0; i < this.rowsLen; i++) {
             const boardRow: any[] = [];
             for (let j = 0; j < this.colsLen; j++) {
                 const bs = createBoarderKeys(i, j, this.rowsLen, this.colsLen);
                 const inPath = this.maxPath.path.has(bs.key);
+                const nodeSet = this.graph.get(bs.key);
+                if (nodeSet === undefined) continue;
                 const borders = {
-                    up: this.graph.get(bs.key).has(bs.up) ? 0 : 1,
-                    down: this.graph.get(bs.key).has(bs.down) ? 0 : 1,
-                    left: this.graph.get(bs.key).has(bs.left) ? 0 : 1,
-                    right: this.graph.get(bs.key).has(bs.right) ? 0 : 1,
+                    up: nodeSet.has(bs.up) ? 0 : 1,
+                    down: nodeSet.has(bs.down) ? 0 : 1,
+                    left: nodeSet.has(bs.left) ? 0 : 1,
+                    right: nodeSet.has(bs.right) ? 0 : 1,
                     key: bs.key,
                     inPath: inPath
                 };
@@ -121,77 +175,89 @@ export default class Maze {
         }
     }
 
-    breadthFirstSearch(source: string, dest: string | null = null, findMax = false) {
+    /**
+     * Performs a breadth-first search to find the longest path in the maze.
+     * @param {string} source The source node.
+     * @param {string} [dest=null] The destination node (optional).
+     * @param {boolean} [findMax=false] Whether to find the longest path (default: false).
+     * @returns {Object} The longest path in the maze.
+     */
+    breadthFirstSearch(source: string, dest: string | null = null, findMax: boolean = false) {
         if (this.debug) console.log("breadthFirstSearch");
-        const visited = new Set();
-        const dist = new Map();
-        const paths = new Map();
-        for (const entry of this.graph.keys()) {
-            dist.set(entry, Infinity);
+        const visited = new Set<string>();
+        const dist = new Map<string, number>();
+        const paths = new Map<string, string>();
+        for (const key of this.graph.keys()) {
+            dist.set(key, Infinity);
         }
 
         dist.set(source, 0);
         paths.set(source, source);
-        const queue: any[] = [];
-        queue.push(source);
+        const queue: string[] = [source];
         let found = false;
         while (queue.length !== 0 || found) {
-
             const node = queue.shift();
-            if (node === undefined) break;
+            if (node == null) break;
 
             visited.add(node);
-            for (const n of this.graph.get(node)) {
-                if (!visited.has(n) && dist.get(node) + 1 < dist.get(n)) {
-                    dist.set(n, dist.get(node) + 1);
-                    paths.set(n, node);
+            const neighbors = this.graph.get(node);
+            if (neighbors === undefined) {
+                throw new Error("Expected key")
+            }
+            for (const neighbor of neighbors) {
+                const distance = dist.get(node);
+                if (distance === undefined) {
+                    throw new Error("Expected key")
+                }
+                const neighborDistance = dist.get(neighbor);
+                if (neighborDistance === undefined) {
+                    throw new Error("Expected key")
+                }
+                if (!visited.has(neighbor) && (distance + 1 < neighborDistance)) {
+                    dist.set(neighbor, distance + 1);
+                    paths.set(neighbor, node);
 
-                    if (dest !== null && n === dest) {
+                    if (dest !== null && neighbor === dest) {
                         found = true;
                         break;
                     }
 
-                    queue.push(n);
+                    queue.push(neighbor);
                 }
             }
         }
-        let maxPath: any = null;
+        let maxPath: MaxPath | null = null;
         if (findMax) {
             for (const dest_i of dist.keys()) {
-
-                if (dist.get(dest_i) === Infinity) continue;
-                if (maxPath == null) {
-                    maxPath = {
-                        path: new Map(), source: source, dest: dest_i, distance: dist.get(dest_i)
-                    };
+                const distance = dist.get(dest_i);
+                if (distance === undefined) {
+                    throw new Error("Expected key");
                 }
 
-                if (dist.get(dest_i) > maxPath.distance) {
-                    maxPath = {
-                        path: new Map(), source: source, dest: dest_i, distance: dist.get(dest_i)
-                    };
-                }
+                if (distance === Infinity) continue;
 
+                if (maxPath === null || distance > maxPath.distance) {
+                    maxPath = new MaxPath(
+                        new Map<string, string>(),
+                        source,
+                        dest_i,
+                        distance);
+                }
             }
         }
         if (dest !== null) {
-            maxPath = {
-                path: new Map(), source: source, dest: dest, distance: dist.get(dest)
-            };
-            let p = paths.get(dest);
-            maxPath.path.set(dest, p);
-            while (p !== source) {
-                const save = p;
-                p = paths.get(p);
-                maxPath.path.set(save, p);
-            }
+            maxPath = new MaxPath(
+                new Map<string, string>(),
+                source,
+                dest,
+                Infinity);
         }
         return maxPath;
     }
 
     findLongestEdgePath() {
         if (this.debug) console.log("findLongestEdgePath");
-        let lsp = null;
+        let lsp: MaxPath | null = null;
         for (const entry of this.graph.keys()) {
             const split = entry.split(" ");
             const row = Number.parseInt(split[0]);
@@ -201,10 +267,8 @@ export default class Maze {
                 (row + 1 >= this.rowsLen) ||
                 (col + 1 >= this.colsLen) ||
                 (col - 1 < 0))) continue;
-
-            const maxPath = this.breadthFirstSearch(entry, null, true);
-            if (lsp == null) lsp = maxPath;
-            if (lsp.distance < maxPath.distance) {
+            const maxPath: MaxPath | null = this.breadthFirstSearch(entry, null, true);
+            if (!lsp || (maxPath && lsp && lsp.distance < maxPath.distance)) {
                 lsp = maxPath;
             }
         }
@@ -238,12 +302,11 @@ export default class Maze {
 
                 // }
 
-                const nodes = new Set();
+                const nodes = new Set<string>();
                 const bs = createBoarderKeys(i, j, this.rowsLen, this.colsLen);
                 this.graph.set(bs.key, nodes);
             }
         }
-        console.log('start', start);
         const visited = new Set();
         const stack: any[] = [];
         stack.push(start);
@@ -274,8 +337,18 @@ export default class Maze {
                 const randIndex = getRandomInt(0, neighbors.length - 1);
                 const randN = neighbors[randIndex];
                 stack.push(randN.parent);
-                this.graph.get(randN.parent).add(randN.neighbor);
-                this.graph.get(randN.neighbor).add(randN.parent);
+
+                const parentValue = this.graph.get(randN.parent);
+                if (parentValue === undefined) {
+                    throw Error("Expected key");
+                }
+                parentValue.add(randN.neighbor);
+
+                const neighborValue = this.graph.get(randN.neighbor);
+                if (neighborValue === undefined) {
+                    throw Error("Expected key");
+                }
+                neighborValue.add(randN.parent);
 
                 visited.add(randN.neighbor);
                 stack.push(randN.neighbor);
@@ -285,7 +358,11 @@ export default class Maze {
         const mazeData: { data: any } = { data: { dims: { rowsLen: this.rowsLen, colsLen: this.colsLen }, nodes: null } };
         const nodes: any[] = [];
         for (const key of this.graph.keys()) {
-            nodes.push([key, [...this.graph.get(key).values()]]);
+            const value = this.graph.get(key);
+            if (value === undefined) {
+                throw Error("Expected key");
+            }
+            nodes.push([key, [...value.values()]]);
 
         }
         mazeData.data.nodes = nodes;
