@@ -60,7 +60,7 @@ function App() {
         AppData.data.maze = new Maze(null, 12, 9);
         AppData.data.maze.init();
       } else {
-        AppData.data.maze = new Maze(null, 16, 20);
+        AppData.data.maze = new Maze(null, 16, 12);
         AppData.data.maze.init();
       }
       setReset(0);

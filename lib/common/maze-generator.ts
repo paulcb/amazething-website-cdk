@@ -48,6 +48,8 @@ class MaxPath {
  *  - mazeJsonOutput: The JSON output of the maze data (optional).
  */
 export default class Maze {
+    static EXP_KEY_MSG: string = "Expected key";
+
     board: any[][];
     graph: Map<string, Set<string>>;
     maxPath: any;
@@ -92,6 +94,33 @@ export default class Maze {
         }
     }
 
+    // getOrThrow(map: Map<string, unknown>, key: string) {
+    //     const value = map.get(key);
+    //     if (value === undefined) {
+    //         throw new Error("Expected key")
+    //     }
+    //     return value
+    // }
+
+    rowColFromString(key: string) {
+        const split = key.split(" ");
+        const row = Number.parseInt(split[0]);
+        const col = Number.parseInt(split[1]);
+        return [row, col]
+    }
+
+    isEdgeNode(key: string) {
+        const [row, col] = this.rowColFromString(key);
+
+        if ((row - 1 < 0) ||
+            (row + 1 >= this.rowsLen) ||
+            (col + 1 >= this.colsLen) ||
+            (col - 1 < 0)) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Initializes the maze data.
      */
@@ -113,37 +142,6 @@ export default class Maze {
 
         this.findLongestEdgePath();
         this.buildBoard();
-    }
-
-    // neighbors(node) {
-    //     const split = node.split(" ");
-    //     const row = Number.parseInt(split[0]);
-    //     const col = Number.parseInt(split[1]);
-    //     // if (!((row - 1 < 0) || (row + 1 >= this.rowsLen) || (col + 1 >= this.colsLen) || (col - 1 < 0))) continue;
-
-    //     const upKey = `${row - 1} ${col}`;
-    //     const downKey = `${row + 1} ${col}`;
-    //     const rightKey = `${row} ${col + 1}`;
-    //     const leftKey = `${row} ${col - 1}`;
-    //     return { up: upKey, down: downKey, right: rightKey, left: leftKey }
-    // }
-
-    addAdjacentNode(set: Set<string>, key1: string | null, key2: string | null) {
-        if (key2 === null || key1 === null) return false;
-        if (set.has(key2)) {
-            const key1Set = this.graph.get(key1);
-            if (key1Set === undefined) {
-                throw Error("Expected key");
-            }
-            const ket2Set = this.graph.get(key2);
-            if (ket2Set === undefined) {
-                throw Error("Expected key");
-            }
-            ket2Set.add(key1);
-            key1Set.add(key2);
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -202,16 +200,16 @@ export default class Maze {
             visited.add(node);
             const neighbors = this.graph.get(node);
             if (neighbors === undefined) {
-                throw new Error("Expected key")
+                throw new Error(Maze.EXP_KEY_MSG)
             }
             for (const neighbor of neighbors) {
                 const distance = dist.get(node);
                 if (distance === undefined) {
-                    throw new Error("Expected key")
+                    throw new Error(Maze.EXP_KEY_MSG)
                 }
                 const neighborDistance = dist.get(neighbor);
                 if (neighborDistance === undefined) {
-                    throw new Error("Expected key")
+                    throw new Error(Maze.EXP_KEY_MSG)
                 }
                 if (!visited.has(neighbor) && (distance + 1 < neighborDistance)) {
                     dist.set(neighbor, distance + 1);
@@ -231,12 +229,14 @@ export default class Maze {
             for (const dest_i of dist.keys()) {
                 const distance = dist.get(dest_i);
                 if (distance === undefined) {
-                    throw new Error("Expected key");
+                    throw new Error(Maze.EXP_KEY_MSG);
                 }
 
                 if (distance === Infinity) continue;
 
                 if (maxPath === null || distance > maxPath.distance) {
+                    if (!this.isEdgeNode(dest_i)) continue;
+
                     maxPath = new MaxPath(
                         new Map<string, string>(),
                         source,
@@ -259,14 +259,7 @@ export default class Maze {
         if (this.debug) console.log("findLongestEdgePath");
         let lsp: MaxPath | null = null;
         for (const entry of this.graph.keys()) {
-            const split = entry.split(" ");
-            const row = Number.parseInt(split[0]);
-            const col = Number.parseInt(split[1]);
-
-            if (!((row - 1 < 0) ||
-                (row + 1 >= this.rowsLen) ||
-                (col + 1 >= this.colsLen) ||
-                (col - 1 < 0))) continue;
+            if (!this.isEdgeNode(entry)) continue;
             const maxPath: MaxPath | null = this.breadthFirstSearch(entry, null, true);
             if (!lsp || (maxPath && lsp && lsp.distance < maxPath.distance)) {
                 lsp = maxPath;
@@ -318,10 +311,7 @@ export default class Maze {
             if (node === undefined) break;
 
             const neighbors: any[] = [];
-
-            const split = node.split(" ");
-            const row = Number.parseInt(split[0]);
-            const col = Number.parseInt(split[1]);
+            const [row, col] = this.rowColFromString(node);
             const bs = createBoarderKeys(row, col, this.rowsLen, this.colsLen);
             for (const [key, value] of Object.entries(bs)) {
                 if (value === null || value === node) continue;
@@ -340,13 +330,13 @@ export default class Maze {
 
                 const parentValue = this.graph.get(randN.parent);
                 if (parentValue === undefined) {
-                    throw Error("Expected key");
+                    throw Error(Maze.EXP_KEY_MSG);
                 }
                 parentValue.add(randN.neighbor);
 
                 const neighborValue = this.graph.get(randN.neighbor);
                 if (neighborValue === undefined) {
-                    throw Error("Expected key");
+                    throw Error(Maze.EXP_KEY_MSG);
                 }
                 neighborValue.add(randN.parent);
 
@@ -360,7 +350,7 @@ export default class Maze {
         for (const key of this.graph.keys()) {
             const value = this.graph.get(key);
             if (value === undefined) {
-                throw Error("Expected key");
+                throw Error(Maze.EXP_KEY_MSG);
             }
             nodes.push([key, [...value.values()]]);
 
