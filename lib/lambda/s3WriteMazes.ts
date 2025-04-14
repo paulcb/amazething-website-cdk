@@ -13,10 +13,10 @@ export const handler = async (
 
         const s3 = new S3();
 
-        const maze1 = new Maze(null, 12, 8);
+        const maze1 = new Maze(null, 12, 9);
         maze1.init();
 
-        const maze2 = new Maze(null, 16, 20);
+        const maze2 = new Maze(null, 16, 12);
         maze2.init();
 
         const today = new Date();

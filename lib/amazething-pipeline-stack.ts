@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 
 import { envTag } from './common/helpers';
 import { AmazethingStage } from './amazething-stage';
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { SecretValue, Stack, StackProps } from 'aws-cdk-lib';
 
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
@@ -20,11 +20,16 @@ export class AmazethingPipelineStack extends Stack {
 
     const pipeline = new CodePipeline(this, envTag(CodePipeline.name), {
       synth: new ShellStep(envTag(ShellStep.name), {
-        input: CodePipelineSource.gitHub('paulcb/amazething-website-cdk', 'main'),
+        input: CodePipelineSource.gitHub('paulcb/amazething-website-cdk', 'main', {
+          authentication: SecretValue.secretsManager('github-token'),
+        }),
         commands: [
           'cd website', 'npm ci', 'npm run build',
           'cd ../',
-          'npm ci', 'npm run build', 'npx cdk synth']
+          'npm ci',
+          'echo Building ...',
+          'npm run build',
+          'npx cdk synth']
       })
     });
 
