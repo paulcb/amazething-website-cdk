@@ -10,7 +10,8 @@ export const AppData: { data: any, constants: any } = {
         mazes: new Map<string, any>(),
     },
     constants: {
-        pathColor: "#e9cbc5",
+        pathColor: "#ccd1d1",
+        sourceDestColor: "#99a3a4",
         winColor: "#a8e4b0",
         blinkClass: "blink"
     }

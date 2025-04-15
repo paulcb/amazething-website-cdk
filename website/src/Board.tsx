@@ -30,7 +30,8 @@ export default function Board() {
 
         AppData.data.lastElement.className = "square";
 
-        element.style.backgroundColor = AppData.constants.pathColor;
+        if(mapKey !== AppData.data.maze.maxPath.dest && mapKey !== AppData.data.maze.maxPath.source)
+            element.style.backgroundColor = AppData.constants.pathColor;
         element.className = `square ${AppData.constants.blinkClass}`;
         AppData.data.path.set(mapKey, element);
 
@@ -71,11 +72,11 @@ export default function Board() {
 
     function color(mapKey: string) {
         if (AppData.data.maze.maxPath.dest === mapKey && !AppData.data.winState) {
-            return AppData.constants.pathColor;
+            return AppData.constants.sourceDestColor;
         }
 
         if (AppData.data.maze.maxPath.source === mapKey && !AppData.data.winState) {
-            return AppData.constants.pathColor;
+            return AppData.constants.sourceDestColor;
         }
 
         return "#fff";
