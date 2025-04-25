@@ -16,14 +16,14 @@ function App() {
   const [currentMaze, setCurrentMaze] = useState<string>("");
   const [mazesDates, setMazesDates] = useState<Set<string>>(new Set<string>());
 
-  const fetchData = async (dateKey: string) => {
+  const fetchData = async () => {
     try {
-      const response = await fetch(`/${dateKey}_mazedata.json`);
+      const response = await fetch("/mazes.json");
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const json = await response.json();
-      // mazesDates.add("Select");
+      
       for (const d of json.mazes) {
         const date = new Date(d.date);
         const dateKey = `${date.toISOString().split('T')[0]}`;
@@ -72,16 +72,7 @@ function App() {
 
   useEffect(() => {
     if (loading) {
-      const date = new Date();
-      const fetchList = [];
-      for (let x = 0; x < 10; x++) {
-        if (x !== 0)
-          date.setDate(date.getDate() - 1);
-        let dateKey = `${date.toISOString().split('T')[0]}`;
-        fetchList.push(fetchData(dateKey));
-      }
-
-      Promise.all(fetchList).then(() => {
+      fetchData().then(() => {
         setData(true);
         setLoading(false);
       });

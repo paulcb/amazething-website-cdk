@@ -56,8 +56,7 @@ export class AMazeThingService extends Construct {
                 bucketName: s3bucket.bucketName,
             },
         });
-
-        s3bucket.grantWrite(writeS3ObjFn);
+        s3bucket.grantReadWrite(writeS3ObjFn);
 
         //TODO: clean bucket on redploy
         //TODO: remove bucket on destroy
