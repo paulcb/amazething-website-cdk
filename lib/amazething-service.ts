@@ -49,7 +49,7 @@ export class AMazeThingService extends Construct {
 
         //TODO: create local link for maze.ts
         const writeS3ObjFn = new NodejsFunction(this, envTag(`${stackName}-${NodejsFunction.name}`), {
-            entry: path.join('./lib/lambda', 's3WriteMazes.ts'),
+            entry: path.join('./lib/lambda', 'maze-lambda.ts'),
             ...nodeJsFunctionProps,
             functionName: `${stackName.replace('-', '')}S3Write`,
             environment: {
@@ -65,7 +65,7 @@ export class AMazeThingService extends Construct {
         new BucketDeployment(this, envTag(`${stackName}-${BucketDeployment.name}`), {
             sources: [Source.asset('./website/dist')],
             destinationBucket: s3bucket,
-            exclude: ["*_mazedata.json"], //don't delete lambda generated maze data
+            exclude: ["mazes.json"], //don't delete lambda generated maze data
             // retainOnDelete: true,
             // prune: false
         });

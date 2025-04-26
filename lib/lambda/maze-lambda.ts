@@ -3,7 +3,7 @@ import { S3Event } from "aws-lambda";
 import { Readable } from "stream";
 
 //TODO: is there a better way to do this. Make a package?
-import { addMaze, MazesJson } from "./mazeJsonHelpers";
+import { addMaze, MazesJson } from "../common/maze-data";
 
 export const handler = async (event: S3Event): Promise<any> => {
     const bucketName = process.env.bucketName || '';
@@ -37,7 +37,7 @@ export const handler = async (event: S3Event): Promise<any> => {
     }
 
     try {
-        mazesJson = addMaze(mazesJson);
+        mazesJson = addMaze(mazesJson, null);
         mazesJson = JSON.stringify(mazesJson);
         const params: PutObjectRequest = {
             Bucket: bucketName,
