@@ -12,7 +12,7 @@ export type MazesJson = {
     mazes: { date: Date; mobile: any; desktop: any; }[]
 };
 
-export function addMaze(mazesJson: MazesJson | null) {
+export function addMaze(mazesJson: MazesJson | null, date: Date | null) {
 
     if (!mazesJson) {
         mazesJson = { mazes: [] };
@@ -23,7 +23,8 @@ export function addMaze(mazesJson: MazesJson | null) {
         mazesJson.mazes.shift();
     }
 
-    const today = new Date();
+    if (!date)
+        date = new Date();
 
     const mobileMaze = new Maze(null, MOBILE_ROW_SIZE, MOBILE_COL_SIZE);
     mobileMaze.init();
@@ -32,7 +33,7 @@ export function addMaze(mazesJson: MazesJson | null) {
     desktopMaze.init();
 
     mazesJson.mazes.push({
-        date: today,
+        date: date,
         mobile: mobileMaze.mazeJsonOutput, desktop: desktopMaze.mazeJsonOutput
     })
 
