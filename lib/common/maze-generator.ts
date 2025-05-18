@@ -36,6 +36,14 @@ class MaxPath {
         this.distance = distance;
     }
 }
+
+export type MazeJson = {
+    dims: {
+        rowsLen: number, colsLen: number
+    },
+    nodes: any
+};
+
 /**
  * Represents a maze with the following properties:
  *  - board: A 2D array representing the maze.
@@ -45,7 +53,7 @@ class MaxPath {
  *  - inputMaze: The input maze data (optional).
  *  - rowsLen: The length of the rows in the maze.
  *  - colsLen: The length of the columns in the maze.
- *  - mazeJsonOutput: The JSON output of the maze data (optional).
+ *  - json: The JSON output of the maze data (optional).
  */
 export default class Maze {
     static EXP_KEY_MSG: string = "Expected key";
@@ -57,7 +65,7 @@ export default class Maze {
     inputMaze: any;
     rowsLen: number;
     colsLen: number;
-    mazeJsonOutput: any;
+    json: any;
 
     /**
      * Constructs a new Maze instance.
@@ -67,7 +75,7 @@ export default class Maze {
      * @param {boolean} [isInit=false] Whether to initialize the maze (default: false).
      * @param {boolean} [debug=false] Whether to enable debugging (default: false).
      */
-    constructor(inputMaze: any,
+    constructor(inputMaze: MazeJson | null,
         rowsLen: number = 16,
         colsLen: number = 6,
         isInit: boolean = false,
@@ -345,7 +353,7 @@ export default class Maze {
             }
         }
 
-        const mazeData: { data: any } = { data: { dims: { rowsLen: this.rowsLen, colsLen: this.colsLen }, nodes: null } };
+        const mazeData: MazeJson = { dims: { rowsLen: this.rowsLen, colsLen: this.colsLen }, nodes: null };
         const nodes: any[] = [];
         for (const key of this.graph.keys()) {
             const value = this.graph.get(key);
@@ -355,8 +363,8 @@ export default class Maze {
             nodes.push([key, [...value.values()]]);
 
         }
-        mazeData.data.nodes = nodes;
-        this.mazeJsonOutput = mazeData;
+        mazeData.nodes = nodes;
+        this.json = mazeData;
 
     }
 
