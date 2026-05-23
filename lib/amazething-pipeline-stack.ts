@@ -1,4 +1,6 @@
 import { CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
+import { LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
+
 import { Construct } from 'constructs';
 
 import { envTag } from './common/helpers';
@@ -24,13 +26,24 @@ export class AmazethingPipelineStack extends Stack {
           authentication: SecretValue.secretsManager('github-token'),
         }),
         commands: [
-          'cd website', 'npm ci', 'npm run build',
-          'cd ../',
+          'cd website',
+          'nvm install 20',
+          'nvm use 20',
+          'node --version', // verify it took
           'npm ci',
+          'npm run build',
+          'cd ../',
           'echo Building ...',
+          'npm ci',
           'npm run build',
           'npx cdk synth']
-      })
+      }),
+      synthCodeBuildDefaults: {
+        buildEnvironment: {
+          buildImage: LinuxBuildImage.STANDARD_7_0,
+        },
+      },
+
     });
 
     pipeline.addStage(new AmazethingStage(this, envTag(AmazethingStage.name), isProduction));
