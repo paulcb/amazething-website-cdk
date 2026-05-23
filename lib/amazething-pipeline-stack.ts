@@ -1,11 +1,12 @@
-import { CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
-import { LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
+import { CodeBuildStep, CodePipeline, CodePipelineSource, ShellStep } from 'aws-cdk-lib/pipelines';
+import { BuildSpec, LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 
 import { Construct } from 'constructs';
 
 import { envTag } from './common/helpers';
 import { AmazethingStage } from './amazething-stage';
 import { SecretValue, Stack, StackProps } from 'aws-cdk-lib';
+import { codebuild } from 'cdk-nag/lib/rules';
 
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
@@ -20,31 +21,37 @@ export class AmazethingPipelineStack extends Stack {
     //   visibilityTimeout: cdk.Duration.seconds(300)
     // });
 
-    const pipeline = new CodePipeline(this, envTag(CodePipeline.name), {
-      synth: new ShellStep(envTag(ShellStep.name), {
+    const pipeline = new CodePipeline(this, 'Pipeline', {
+      synth: new CodeBuildStep('Synth', {
         input: CodePipelineSource.gitHub('paulcb/amazething-website-cdk', 'main', {
           authentication: SecretValue.secretsManager('github-token'),
         }),
         commands: [
           'cd website',
-          'nvm install 20',
-          'nvm use 20',
-          'node --version', // verify it took
+          // 'nvm install 20',
+          // 'nvm use 20',
+          // 'node --version', // verify it took
           'npm ci',
           'npm run build',
           'cd ../',
           'echo Building ...',
           'npm ci',
           'npm run build',
-          'npx cdk synth']
-      }),
-      synthCodeBuildDefaults: {
+          'npx cdk synth'],
         buildEnvironment: {
           buildImage: LinuxBuildImage.STANDARD_7_0,
         },
-      },
-
+        partialBuildSpec: BuildSpec.fromObject({
+          version: '0.2',
+          phases: {
+            install: {
+              'runtime-versions': { nodejs: '20' },
+            },
+          },
+        }),
+      }),
     });
+
 
     pipeline.addStage(new AmazethingStage(this, envTag(AmazethingStage.name), isProduction));
   }
