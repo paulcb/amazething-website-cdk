@@ -1,4 +1,5 @@
-import Maze, { MazeJson } from "../common/maze-generator";
+import Maze from "../common/maze-generator";
+import { MazeJson } from "../common/maze-generator";
 
 export const DESKTOP_ROW_SIZE = 12;
 export const DESKTOP_COL_SIZE = 10;
@@ -11,7 +12,8 @@ export const COL_SCAL = 0;
 
 export const MAX_MAXES = 10;
 
-export const MAZE_DIFFICULTIES = { easy: "Easy", medium: "Medium", hard: "Hard" };
+export const MAZE_DIFFICULTY = { easy: "Easy", medium: "Medium", hard: "Hard" };
+
 export type MazeContainer = {
     date: Date;
     mobile: { easy: MazeJson, medium: MazeJson, hard: MazeJson };
@@ -33,7 +35,7 @@ export function addMaze(mazesJson: MazesJson | null, date: Date | null) {
     if (!date)
         date = new Date();
 
-    // for (const [key, value] of Object.entries(MAZE_DIFFICULTIES)) {
+    // for (const [key, value] of Object.entries(MAZE_DIFFICULTY)) {
     //     console.log(`${key}: ${value.desktop.colLength}`);
     //     const mobileMaze = new Maze(null, value.mobile.rowLength, value.mobile.colLength, true);
     //     const desktopMaze = new Maze(null, value.desktop.rowLength, value.desktop.colLength, true);
@@ -58,21 +60,21 @@ export function addMaze(mazesJson: MazesJson | null, date: Date | null) {
 export function byDifficulty(difficulty: string, isMobile: boolean, mazeData: MazeContainer) {
     let mazeJson = null;
     if (isMobile) {
-        if (difficulty === MAZE_DIFFICULTIES.easy) {
+        if (difficulty === MAZE_DIFFICULTY.easy) {
             mazeJson = mazeData.mobile.easy;
-        } else if (difficulty === MAZE_DIFFICULTIES.medium) {
+        } else if (difficulty === MAZE_DIFFICULTY.medium) {
             mazeJson = mazeData.mobile.medium;
         }
-        else if (difficulty === MAZE_DIFFICULTIES.hard) {
+        else if (difficulty === MAZE_DIFFICULTY.hard) {
             mazeJson = mazeData.mobile.hard;
         }
     } else {
-        if (difficulty === MAZE_DIFFICULTIES.easy) {
+        if (difficulty === MAZE_DIFFICULTY.easy) {
             mazeJson = mazeData.desktop.easy;
-        } else if (difficulty === MAZE_DIFFICULTIES.medium) {
+        } else if (difficulty === MAZE_DIFFICULTY.medium) {
             mazeJson = mazeData.desktop.medium;
         }
-        else if (difficulty === MAZE_DIFFICULTIES.hard) {
+        else if (difficulty === MAZE_DIFFICULTY.hard) {
             mazeJson = mazeData.desktop.hard;
         }
     }

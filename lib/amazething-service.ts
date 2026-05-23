@@ -1,7 +1,7 @@
 import { Construct } from 'constructs';
 import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Bucket, BlockPublicAccess, BucketAccessControl } from 'aws-cdk-lib/aws-s3';
-import { AllowedMethods, Distribution, GeoRestriction, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
+import { AllowedMethods, Distribution, GeoRestriction, ViewerProtocolPolicy, SecurityPolicyProtocol } from 'aws-cdk-lib/aws-cloudfront';
 
 import { CfnOutput, Duration, RemovalPolicy, Stack } from 'aws-cdk-lib';
 import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
@@ -12,6 +12,7 @@ import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 
 import path = require('path');
+
 import { envTag } from './common/helpers';
 
 export class AMazeThingService extends Construct {
@@ -39,10 +40,10 @@ export class AMazeThingService extends Construct {
         const nodeJsFunctionProps: NodejsFunctionProps = {
             bundling: {
                 externalModules: [
-                    'aws-sdk', // Use the 'aws-sdk' available in the Lambda runtime
+                    '@aws-sdk/*', // v3 is built into Node 18+ Lambda runtimes
                 ],
             },
-            runtime: Runtime.NODEJS_18_X,
+            runtime: Runtime.NODEJS_LATEST,
             timeout: Duration.minutes(3), // Default is 3 seconds
             memorySize: 256,
         };
@@ -78,7 +79,8 @@ export class AMazeThingService extends Construct {
                 allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
                 viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
             },
-            // geoRestriction: GeoRestriction.allowlist('US'),
+            geoRestriction: GeoRestriction.allowlist('US'),
+            minimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_2_2021,
         });
 
         //TODO: AWS logs show that schedule doesn't occur actually at 0:0:0. Check why.

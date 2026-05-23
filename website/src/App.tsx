@@ -4,7 +4,7 @@ import { ChangeEvent, useEffect, useState, useCallback } from 'react';
 
 // import './App.css';
 import Maze, { MazeJson } from './../../lib/common/maze-generator';
-import { addMaze, byDifficulty, MazesJson, MAZE_DIFFICULTIES, MazeContainer } from './../../lib/common/maze-data';
+import { addMaze, byDifficulty, MazesJson, MazeContainer, MAZE_DIFFICULTY } from './../../lib/common/maze-data';
 import MazeGrid from "./MazeGrid";
 
 
@@ -24,7 +24,7 @@ function App() {
   const [reset, setReset] = useState(0);
   const [selected, setSelected] = useState<boolean>(false);
   const [currentMazeDate, setCurrentMazeDate] = useState<string>("");
-  const [difficulty, setDifficulty] = useState<string>(MAZE_DIFFICULTIES.medium);
+  const [difficulty, setDifficulty] = useState<string>(MAZE_DIFFICULTY.medium);
   const [currMaze, setCurrMaze] = useState<Maze | null>(null);
   const [mazes, setMazes] = useState<Map<string, MazeContainer>>(new Map<string, MazeContainer>());
 
@@ -286,7 +286,7 @@ function App() {
       <div style={{ float: "left" }}>
         <button className="controls" onClick={startNewMaze}> New </button>
         <select className="controls" name="difficulty" id="maze-diff-select" onChange={onChangeDiffculty} value={difficulty} >
-          {Object.entries(MAZE_DIFFICULTIES).map(([key, value]) => (
+          {Object.entries(MAZE_DIFFICULTY).map(([key, value]) => (
             <option key={`difficulty-${key}`} className="controls" value={value}>{value}</option>
           ))}
         </select>

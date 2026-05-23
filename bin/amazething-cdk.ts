@@ -3,8 +3,13 @@ import * as cdk from 'aws-cdk-lib';
 import { AmazethingStack } from '../lib/amazething-stack';
 import { AmazethingPipelineStack } from '../lib/amazething-pipeline-stack';
 import { envTag } from '../lib/common/helpers';
+// import { AwsSolutionsChecks } from 'cdk-nag';
+// import { Aspects } from 'aws-cdk-lib';
+
 
 const app = new cdk.App();
+// Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
+
 console.log('CDK_DEFAULT_ACCOUNT', process.env.CDK_DEFAULT_ACCOUNT);
 console.log('CDK_DEFAULT_REGION', process.env.CDK_DEFAULT_REGION);
 
