@@ -1,4 +1,4 @@
-import { addMaze, MAX_MAXES } from "../lib/common/maze-data";
+import { addMaze, MAX_MAXES } from '@local/shared';
 
 test('Empty Mazes Json Tests', () => {
 

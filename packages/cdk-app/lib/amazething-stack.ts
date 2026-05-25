@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { AMazeThingService } from './amazething-service';
-import { envTag } from './common/helpers';
+import { envTag } from '@local/shared';;
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class AmazethingStack extends cdk.Stack {

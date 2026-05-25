@@ -1,15 +1,17 @@
 {
-  "name": "website",
+  "name": "@local/website",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "clean": "tsc -b --clean && rm -r dist",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@local/shared": "^1.0.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },
@@ -22,8 +24,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.26",
     "globals": "^15.15.0",
-    "typescript": "~5.7.2",
-    "typescript-eslint": "^8.59.4",
+    "typescript-eslint": "^8.60.0",
     "vite": "^8.0.14"
   }
 }

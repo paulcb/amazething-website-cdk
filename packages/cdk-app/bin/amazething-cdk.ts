@@ -2,7 +2,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { AmazethingStack } from '../lib/amazething-stack';
 import { AmazethingPipelineStack } from '../lib/amazething-pipeline-stack';
-import { envTag } from '../lib/common/helpers';
+import { envTag } from '@local/shared';
 // import { AwsSolutionsChecks } from 'cdk-nag';
 // import { Aspects } from 'aws-cdk-lib';
 
@@ -30,8 +30,13 @@ if (isProduction) {
     { env: env });
 
 } else {
-  new AmazethingStack(app,
-    envTag(AmazethingStack.name),
+  // new AmazethingStack(app,
+  //   envTag(AmazethingStack.name),
+  //   isProduction,
+  //   { env: env });
+
+  new AmazethingPipelineStack(app,
+    envTag(AmazethingPipelineStack.name),
     isProduction,
     { env: env });
 

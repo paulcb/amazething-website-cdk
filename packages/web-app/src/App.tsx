@@ -3,8 +3,13 @@ import { Constants } from "./constants";
 import { ChangeEvent, useEffect, useState, useCallback } from 'react';
 
 // import './App.css';
-import Maze, { MazeJson } from './../../lib/common/maze-generator';
-import { addMaze, byDifficulty, MazesJson, MazeContainer, MAZE_DIFFICULTY } from './../../lib/common/maze-data';
+import {
+  Maze,
+  MazeJson,
+  addMaze,
+  byDifficulty,
+  MazesJson, MazeContainer, MAZE_DIFFICULTY
+} from '@local/shared';
 import MazeGrid from "./MazeGrid";
 
 
@@ -296,7 +301,7 @@ function App() {
           ))}
         </select>
         <div>Duration (sec): {seconds.toString()}</div>
-        <div>Block Count: {blockCount.toString()}</div>
+        <div>Path Length: {blockCount.toString()}</div>
         <div>
           <table>
             <tbody>

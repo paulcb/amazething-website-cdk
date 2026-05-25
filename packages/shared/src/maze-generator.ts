@@ -55,7 +55,7 @@ export type MazeJson = {
  *  - colsLen: The length of the columns in the maze.
  *  - json: The JSON output of the maze data (optional).
  */
-export default class Maze {
+export class Maze {
     static EXP_KEY_MSG: string = "Expected key";
 
     board: any[][];

@@ -3,10 +3,10 @@ import { BuildSpec, LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 
 import { Construct } from 'constructs';
 
-import { envTag } from './common/helpers';
+import { envTag } from '@local/shared';
 import { AmazethingStage } from './amazething-stage';
 import { SecretValue, Stack, StackProps } from 'aws-cdk-lib';
-import { codebuild } from 'cdk-nag/lib/rules';
+// import { codebuild } from 'cdk-nag/lib/rules';
 
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
@@ -23,21 +23,20 @@ export class AmazethingPipelineStack extends Stack {
 
     const pipeline = new CodePipeline(this, 'Pipeline', {
       synth: new CodeBuildStep('Synth', {
-        input: CodePipelineSource.gitHub('paulcb/amazething-website-cdk', 'main', {
+        input: CodePipelineSource.gitHub('paulcb/amazething-website-cdk', 'mono-repo-refactor', {
           authentication: SecretValue.secretsManager('github-token'),
         }),
+        installCommands: [
+          'npm install',
+          'ls node_modules/@local',  // confirm symlink exists
+          'ls node_modules/@local/dist'  // confirm symlink exists
+        ],
         commands: [
-          'cd website',
-          // 'nvm install 20',
-          // 'nvm use 20',
-          // 'node --version', // verify it took
-          'npm ci',
-          'npm run build',
-          'cd ../',
-          'echo Building ...',
-          'npm ci',
-          'npm run build',
-          'npx cdk synth'],
+          'npm run build --workspace=packages/shared',
+          // 'cd packages/shared && npx tsc --listEmittedFiles && cd ../../',
+          'npm run build --workspace=packages/cdk-app',
+          'npm run build --workspace=packages/web-app',
+          'cd packages/cdk-app && npx cdk synth'],
         buildEnvironment: {
           buildImage: LinuxBuildImage.STANDARD_7_0,
         },
@@ -45,10 +44,11 @@ export class AmazethingPipelineStack extends Stack {
           version: '0.2',
           phases: {
             install: {
-              'runtime-versions': { nodejs: '20' },
+              'runtime-versions': { nodejs: '24' },
             },
           },
         }),
+        primaryOutputDirectory: 'packages/cdk-app/cdk.out',
       }),
     });
 

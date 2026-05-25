@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 
-import { addMaze } from "../lib/common/maze-data";
+import { addMaze } from '@local/shared';
 
 const dayCount = 10;
 const date = new Date();

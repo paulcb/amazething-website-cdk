@@ -1,5 +1,5 @@
-import Maze from "../common/maze-generator";
-import { MazeJson } from "../common/maze-generator";
+import { Maze } from "./maze-generator";
+import { MazeJson } from "./maze-generator";
 
 export const DESKTOP_ROW_SIZE = 12;
 export const DESKTOP_COL_SIZE = 10;

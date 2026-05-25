@@ -1,5 +1,5 @@
 import { Construct } from "constructs";
-import { envTag } from './common/helpers';
+import { envTag } from '@local/shared';
 import { AmazethingStack } from './amazething-stack';
 import { Stage, StageProps } from 'aws-cdk-lib';
 

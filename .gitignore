@@ -10,3 +10,7 @@ cdk.out
 .env
 
 *_mazedata.json
+
+dist
+
+tsconfig.tsbuildinfo

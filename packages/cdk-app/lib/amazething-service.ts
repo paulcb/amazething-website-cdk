@@ -13,7 +13,9 @@ import { Runtime } from 'aws-cdk-lib/aws-lambda';
 
 import path = require('path');
 
-import { envTag } from './common/helpers';
+import { envTag } from '@local/shared';;
+import { paths } from './paths';
+
 
 export class AMazeThingService extends Construct {
     constructor(scope: Construct, id: string, isProduction: boolean) {
@@ -64,7 +66,7 @@ export class AMazeThingService extends Construct {
         //TODO: make bucket sync with github repo?
         //TODO: check that permission are best practice for static website
         new BucketDeployment(this, envTag(`${stackName}-${BucketDeployment.name}`), {
-            sources: [Source.asset('./website/dist')],
+            sources: [Source.asset(paths.webdist)],
             destinationBucket: s3bucket,
             exclude: ["mazes.json"], //don't delete lambda generated maze data
             // retainOnDelete: true,
