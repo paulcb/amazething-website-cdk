@@ -27,13 +27,10 @@ export class AmazethingPipelineStack extends Stack {
           authentication: SecretValue.secretsManager('github-token'),
         }),
         installCommands: [
-          'npm install',
-          'ls node_modules/@local',  // confirm symlink exists
-          'ls node_modules/@local/dist'  // confirm symlink exists
+          'npm install'
         ],
         commands: [
           'npm run build --workspace=packages/shared',
-          // 'cd packages/shared && npx tsc --listEmittedFiles && cd ../../',
           'npm run build --workspace=packages/cdk-app',
           'npm run build --workspace=packages/web-app',
           'cd packages/cdk-app && npx cdk synth'],
