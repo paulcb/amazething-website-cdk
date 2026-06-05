@@ -23,13 +23,13 @@ const env = {
   region: process.env.CDK_DEFAULT_REGION
 };
 
-if (isProduction) {
-  new AmazethingPipelineStack(app,
-    envTag(AmazethingPipelineStack.name),
-    isProduction,
-    { env: env });
+// if (isProduction) {
+//   new AmazethingPipelineStack(app,
+//     envTag(AmazethingPipelineStack.name),
+//     isProduction,
+//     { env: env });
 
-} else {
+// } else {
   // new AmazethingStack(app,
   //   envTag(AmazethingStack.name),
   //   isProduction,
@@ -37,7 +37,7 @@ if (isProduction) {
 
   new AmazethingPipelineStack(app,
     envTag(AmazethingPipelineStack.name),
-    isProduction,
+    false,
     { env: env });
 
-}
+// }
