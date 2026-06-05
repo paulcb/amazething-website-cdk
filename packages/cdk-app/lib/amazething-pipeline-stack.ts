@@ -27,7 +27,7 @@ export class AmazethingPipelineStack extends Stack {
           authentication: SecretValue.secretsManager('github-token'),
         }),
         installCommands: [
-          'npm install'
+          'npm ci'
         ],
         commands: [
           'npm run build --workspace=packages/shared',
