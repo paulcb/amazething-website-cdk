@@ -13,7 +13,7 @@ import { Runtime } from 'aws-cdk-lib/aws-lambda';
 
 import path = require('path');
 
-import { envTag } from '@local/shared';;
+import { envTag } from '@local/shared';
 import { paths } from './paths';
 
 

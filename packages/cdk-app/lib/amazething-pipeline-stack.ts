@@ -22,7 +22,7 @@ export class AmazethingPipelineStack extends Stack {
     // });
 
     const pipeline = new CodePipeline(this, 'Pipeline', {
-      synth: new CodeBuildStep('Synth', {
+      synth: new ShellStep('Synth', {
         input: CodePipelineSource.gitHub('paulcb/amazething-website-cdk', 'mono-repo-refactor', {
           authentication: SecretValue.secretsManager('github-token'),
         }),
@@ -34,19 +34,25 @@ export class AmazethingPipelineStack extends Stack {
           'npm run build --workspace=packages/cdk-app',
           'npm run build --workspace=packages/web-app',
           'cd packages/cdk-app && npx cdk synth'],
+        // buildEnvironment: {
+        //   buildImage: LinuxBuildImage.STANDARD_7_0,
+        // },
+        // partialBuildSpec: BuildSpec.fromObject({
+        //   version: '0.2',
+        //   phases: {
+        //     install: {
+        //       'runtime-versions': { nodejs: '24' },
+        //     },
+        //   },
+        // }),
+        primaryOutputDirectory: 'packages/cdk-app/cdk.out',
+      }),
+      codeBuildDefaults: {
         buildEnvironment: {
           buildImage: LinuxBuildImage.STANDARD_7_0,
         },
-        partialBuildSpec: BuildSpec.fromObject({
-          version: '0.2',
-          phases: {
-            install: {
-              'runtime-versions': { nodejs: '24' },
-            },
-          },
-        }),
-        primaryOutputDirectory: 'packages/cdk-app/cdk.out',
-      }),
+      },
+
     });
 
 
